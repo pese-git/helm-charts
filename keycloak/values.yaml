@@ -48,3 +48,17 @@ env:
     value: "{{ .Values.externalDatabase.username }}"
   - name: KC_DB_PASSWORD
     value: "{{ .Values.externalDatabase.password }}"
+  - name: KC_HOSTNAME
+    value: "{{ .Values.ingress.host }}"
+  - name: KC_HOSTNAME_PORT
+    value: "443"
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "false"
+  - name: KC_HTTP_ENABLED
+    value: "true"
+  - name: KEYCLOAK_ADMIN
+    value: "admin"
+  - name: KEYCLOAK_ADMIN_PASSWORD
+    value: "admin"

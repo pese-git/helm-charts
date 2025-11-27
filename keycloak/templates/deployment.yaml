@@ -18,6 +18,12 @@ spec:
         - name: keycloak
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/opt/keycloak/bin/kc.sh"]
+          args:
+            - "start"
+            - "--http-enabled=true"
+            - "--hostname-strict=false"
+            - "--hostname-strict-https=false"
           ports:
             - containerPort: 8080
           env:
