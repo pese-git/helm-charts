@@ -1,0 +1,50 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: "26.4.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  host: keycloak.example.com
+  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"   # если используешь cert‑manager + TLS
+  tls: false  # если true — нужен секрет TLS, тогда добавь `tlsSecretName`
+  tlsSecretName: keycloak-tls
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1
+    memory: 1Gi
+
+externalDatabase:
+  host: "192.168.0.4"
+  port: 5432
+  username: "keycloak"
+  password: "secret"         # для продакшна лучше передавать через Secret
+  database: "keycloak"
+
+# Переменные окружения Keycloak
+env:
+  - name: KC_DB
+    value: postgres
+  - name: KC_DB_URL_HOST
+    value: "{{ .Values.externalDatabase.host }}"
+  - name: KC_DB_URL_PORT
+    value: "{{ .Values.externalDatabase.port }}"
+  - name: KC_DB_URL_DATABASE
+    value: "{{ .Values.externalDatabase.database }}"
+  - name: KC_DB_USERNAME
+    value: "{{ .Values.externalDatabase.username }}"
+  - name: KC_DB_PASSWORD
+    value: "{{ .Values.externalDatabase.password }}"
