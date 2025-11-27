@@ -54,8 +54,6 @@ env:
     value: "443"
   - name: KC_HOSTNAME_STRICT
     value: "false"
-  - name: KC_HOSTNAME_STRICT_HTTPS
-    value: "false"
   - name: KC_HTTP_ENABLED
     value: "true"
   - name: KEYCLOAK_ADMIN

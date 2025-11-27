@@ -23,7 +23,6 @@ spec:
             - "start"
             - "--http-enabled=true"
             - "--hostname-strict=false"
-            - "--hostname-strict-https=false"
           ports:
             - containerPort: 8080
           env:
