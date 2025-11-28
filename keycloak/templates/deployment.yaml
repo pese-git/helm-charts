@@ -6,6 +6,11 @@ metadata:
     app: {{ include "keycloak.name" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: {{ include "keycloak.name" . }}
@@ -14,6 +19,13 @@ spec:
       labels:
         app: {{ include "keycloak.name" . }}
     spec:
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
       containers:
         - name: keycloak
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -21,8 +33,6 @@ spec:
           command: ["/opt/keycloak/bin/kc.sh"]
           args:
             - "start-dev"
-            - "--hostname={{ .Values.keycloak.hostname }}"
-            - "--proxy-headers={{ .Values.keycloak.proxyHeaders }}"
             - "--http-enabled={{ .Values.keycloak.httpEnabled }}"
 
           ports:

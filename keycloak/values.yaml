@@ -161,3 +161,20 @@ logging:
   ## @param logging.level Уровень логирования
   ## Возможные значения: FATAL, ERROR, WARN, INFO, DEBUG, TRACE, ALL
   level: "INFO"
+
+# =============================================================================
+# Безопасность
+# =============================================================================
+## @section Security parameters
+## Настройки контекста безопасности для подов
+securityContext:
+  ## @param securityContext.enabled Включить настройки securityContext
+  enabled: true
+  ## @param securityContext.runAsNonRoot Запретить запуск от имени пользователя root
+  runAsNonRoot: true
+  ## @param securityContext.runAsUser ID пользователя для запуска контейнера
+  runAsUser: 1000
+  ## @param securityContext.runAsGroup ID группы для запуска контейнера
+  runAsGroup: 1000
+  ## @param securityContext.fsGroup ID группы для файловой системы
+  fsGroup: 1000
