@@ -27,10 +27,50 @@ spec:
           ports:
             - containerPort: 8080
           env:
-{{- range .Values.env }}
+            ## Настройки базы данных
+            - name: KC_DB
+              value: "postgres"
+            - name: KC_DB_URL_HOST
+              value: "{{ .Values.externalDatabase.host }}"
+            - name: KC_DB_URL_PORT
+              value: "{{ .Values.externalDatabase.port }}"
+            - name: KC_DB_URL_DATABASE
+              value: "{{ .Values.externalDatabase.database }}"
+            - name: KC_DB_USERNAME
+              value: "{{ .Values.externalDatabase.username }}"
+            - name: KC_DB_PASSWORD
+              value: "{{ .Values.externalDatabase.password }}"
+              
+            ## Настройки прокси и хоста
+            - name: KC_HOSTNAME
+              value: "{{ .Values.keycloak.hostname }}"
+            - name: KC_PROXY_HEADERS
+              value: "{{ .Values.keycloak.proxyHeaders }}"
+
+            ## Учетные данные администратора
+            {{- if .Values.adminCredentials.useSecret }}
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (include "keycloak.fullname" .) .Values.adminCredentials.existingSecret }}
+                  key: KEYCLOAK_ADMIN
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (include "keycloak.fullname" .) .Values.adminCredentials.existingSecret }}
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            {{- else }}
+            - name: KEYCLOAK_ADMIN
+              value: "{{ .Values.adminCredentials.username }}"
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: "{{ .Values.adminCredentials.password }}"
+            {{- end }}
+            
+            ## Дополнительные переменные окружения
+            {{- range .Values.extraEnv }}
             - name: {{ .name }}
               value: "{{ .value }}"
-{{- end }}
+            {{- end }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
@@ -38,3 +78,23 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
+          {{- if .Values.probes }}
+          {{- if .Values.probes.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.liveness.path }}
+              port: 8080
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+          {{- end }}
+          {{- if .Values.probes.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readiness.path }}
+              port: 8080
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+          {{- end }}
+          {{- end }}

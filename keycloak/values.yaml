@@ -1,66 +1,154 @@
+# =============================================================================
+# Общие настройки Keycloak
+# =============================================================================
+## Количество реплик для развертывания Keycloak
+## @param replicaCount Количество подов Keycloak
 replicaCount: 1
 
+## Настройки образа Keycloak
+## @section Image parameters
 image:
+  ## @param image.repository Репозиторий с образом Keycloak
   repository: quay.io/keycloak/keycloak
+  ## @param image.tag Тег образа Keycloak (версия)
   tag: "26.4.0"
+  ## @param image.pullPolicy Политика загрузки образа
+  ## Ref: https://kubernetes.io/docs/concepts/containers/images/#updating-images
   pullPolicy: IfNotPresent
 
+# =============================================================================
+# Сетевые настройки
+# =============================================================================
+## Настройки Kubernetes Service
+## @section Service parameters
 service:
+  ## @param service.type Тип службы Kubernetes 
+  ## Возможные значения: ClusterIP, NodePort, LoadBalancer
   type: ClusterIP
+  ## @param service.port Порт, на котором будет доступен Keycloak
   port: 8080
 
+## Настройки Ingress
+## @section Ingress parameters
 ingress:
+  ## @param ingress.enabled Включить Ingress для Keycloak
   enabled: true
+  ## @param ingress.host Имя хоста для доступа к Keycloak
   host: keycloak.example.com
+  ## @param ingress.className Класс Ingress контроллера
   className: nginx
+  ## @param ingress.annotations Аннотации для Ingress ресурса
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
     nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
-    # cert-manager.io/cluster-issuer: "letsencrypt-prod"   # если используешь cert‑manager + TLS
-  tls: false  # если true — нужен секрет TLS, тогда добавь `tlsSecretName`
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"   # Раскомментировать для автоматического получения TLS сертификата
+  ## @param ingress.tls Включить TLS для Ingress
+  tls: false
+  ## @param ingress.tlsSecretName Имя секрета с TLS сертификатом 
+  ## (обязательно указать, если tls: true)
   tlsSecretName: keycloak-tls
 
-# Keycloak proxy and hostname configuration
+# =============================================================================
+# Настройки Keycloak
+# =============================================================================
+## Настройки прокси и хостнейма для Keycloak
+## @section Keycloak configuration
 keycloak:
-  hostname: "https://keycloak.example.com"  # Full URL for production
-  proxyHeaders: "xforwarded"                # Use X-Forwarded headers from proxy
-  httpEnabled: true                         # Enable HTTP (will be upgraded to HTTPS by ingress)
+  ## @param keycloak.hostname Полный URL для доступа к Keycloak
+  ## Этот URL будет использоваться для генерации ссылок внутри Keycloak
+  hostname: "https://keycloak.example.com"
+  ## @param keycloak.proxyHeaders Конфигурация заголовков прокси
+  ## xforwarded - использовать X-Forwarded-* заголовки от обратного прокси
+  proxyHeaders: "xforwarded"
+  ## @param keycloak.httpEnabled Включить HTTP (без TLS в контейнере)
+  ## true - для использования TLS терминации на Ingress
+  httpEnabled: true
 
+# =============================================================================
+# Ресурсы и масштабирование
+# =============================================================================
+## Ограничения ресурсов для контейнера Keycloak
+## @section Resource parameters
 resources:
+  ## @param resources.requests.cpu Запрос CPU ресурсов
+  ## @param resources.requests.memory Запрос памяти
   requests:
     cpu: 500m
     memory: 512Mi
+  ## @param resources.limits.cpu Лимит CPU ресурсов
+  ## @param resources.limits.memory Лимит памяти
   limits:
     cpu: 1
     memory: 1Gi
 
+# =============================================================================
+# Настройки базы данных
+# =============================================================================
+## Настройки внешней базы данных PostgreSQL
+## @section Database parameters
 externalDatabase:
+  ## @param externalDatabase.host Хост базы данных PostgreSQL
   host: "192.168.0.4"
+  ## @param externalDatabase.port Порт базы данных PostgreSQL
   port: 5432
+  ## @param externalDatabase.username Имя пользователя БД
   username: "keycloak"
-  password: "secret"         # для продакшна лучше передавать через Secret
+  ## @param externalDatabase.password Пароль пользователя БД
+  ## ВАЖНО: для продакшна рекомендуется использовать Kubernetes Secret
+  password: "secret"
+  ## @param externalDatabase.database Имя базы данных
   database: "keycloak"
 
-# Переменные окружения Keycloak
-env:
-  - name: KC_DB
-    value: postgres
-  - name: KC_DB_URL_HOST
-    value: "{{ .Values.externalDatabase.host }}"
-  - name: KC_DB_URL_PORT
-    value: "{{ .Values.externalDatabase.port }}"
-  - name: KC_DB_URL_DATABASE
-    value: "{{ .Values.externalDatabase.database }}"
-  - name: KC_DB_USERNAME
-    value: "{{ .Values.externalDatabase.username }}"
-  - name: KC_DB_PASSWORD
-    value: "{{ .Values.externalDatabase.password }}"
-  - name: KC_HOSTNAME
-    value: "{{ .Values.keycloak.hostname }}"
-  - name: KC_PROXY_HEADERS
-    value: "{{ .Values.keycloak.proxyHeaders }}"
-  - name: KEYCLOAK_ADMIN
-    value: "admin"
-  - name: KEYCLOAK_ADMIN_PASSWORD
-    value: "admin"
+# =============================================================================
+# Администратор Keycloak
+# =============================================================================
+## Настройки учетной записи администратора
+## @section Admin credentials
+adminCredentials:
+  ## @param adminCredentials.username Имя пользователя администратора
+  username: "admin"
+  ## @param adminCredentials.password Пароль администратора
+  ## ВАЖНО: для продакшна рекомендуется использовать Kubernetes Secret
+  password: "admin"
+  ## @param adminCredentials.useSecret Использовать ли Secret для хранения учетных данных
+  useSecret: false
+  ## @param adminCredentials.existingSecret Имя существующего Secret для учетных данных
+  ## Secret должен содержать ключи KEYCLOAK_ADMIN и KEYCLOAK_ADMIN_PASSWORD
+  existingSecret: ""
+
+# =============================================================================
+# Дополнительные переменные окружения (опционально)
+# =============================================================================
+## Дополнительные переменные окружения для контейнера Keycloak
+## @section Extra environment variables
+## 
+## Переменные, которые не генерируются автоматически из других настроек
+## Пример:
+## extraEnv:
+##   - name: KC_TRANSACTION_XA_ENABLED
+##     value: "false"
+##   - name: KC_LOG_LEVEL
+##     value: "INFO"
+##
+extraEnv: []
+
+# =============================================================================
+# Мониторинг и проверки работоспособности (опционально)
+# =============================================================================
+## @section Probes parameters
+## Раскомментируйте для включения readiness/liveness проверок
+## 
+# probes:
+#   liveness:
+#     enabled: true
+#     initialDelaySeconds: 30
+#     periodSeconds: 10
+#     timeoutSeconds: 5
+#     path: /health/live
+#   readiness:
+#     enabled: true
+#     initialDelaySeconds: 30
+#     periodSeconds: 10
+#     timeoutSeconds: 5
+#     path: /health/ready

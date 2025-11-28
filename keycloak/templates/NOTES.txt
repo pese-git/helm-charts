@@ -1,0 +1,63 @@
+======================================================================================
+   Keycloak установлен успешно!
+======================================================================================
+
+Ваш Keycloak доступен по адресу:
+{{- if .Values.ingress.enabled }}
+  http{{ if .Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.host }}
+{{- else }}
+  Для доступа к Keycloak без Ingress, выполните следующие команды:
+  
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ include "keycloak.name" . }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+  
+  После этого Keycloak будет доступен по адресу http://127.0.0.1:8080
+{{- end }}
+
+Данные для входа администратора:
+  Логин:    {{ .Values.adminCredentials.username }}
+  {{- if not .Values.adminCredentials.useSecret }}
+  Пароль:   {{ .Values.adminCredentials.password }}
+  {{- else }}
+  Пароль:   [хранится в Secret: {{ default (include "keycloak.fullname" .) .Values.adminCredentials.existingSecret }}]
+  {{- end }}
+
+{{- if and (eq .Values.adminCredentials.username "admin") (eq .Values.adminCredentials.password "admin") }}
+
+ВНИМАНИЕ: Используются стандартные учетные данные администратора! 
+Рекомендуется изменить их перед использованием в продакшне.
+{{- end }}
+{{- end }}
+{{- end }}
+
+Информация о базе данных:
+  Тип:      PostgreSQL
+  Хост:     {{ .Values.externalDatabase.host }}:{{ .Values.externalDatabase.port }}
+  База:     {{ .Values.externalDatabase.database }}
+  Пользователь: {{ .Values.externalDatabase.username }}
+
+======================================================================================
+Рекомендации по безопасности:
+======================================================================================
+
+1. Измените стандартный пароль администратора
+2. Настройте TLS для защищенного соединения
+{{- if not .Values.ingress.tls }}
+   - Включите параметр ingress.tls: true
+   - Укажите ingress.tlsSecretName: имя-секрета-с-сертификатом
+{{- end }}
+3. Для производственного использования храните пароли в Kubernetes Secrets
+
+======================================================================================
+Дополнительные команды:
+======================================================================================
+
+Получить статус релиза:
+  $ helm status {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+Обновить релиз:
+  $ helm upgrade {{ .Release.Name }} -n {{ .Release.Namespace }} .
+
+Удалить релиз:
+  $ helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
