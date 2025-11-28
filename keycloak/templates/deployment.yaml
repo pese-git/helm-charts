@@ -24,6 +24,8 @@ spec:
             - "--hostname={{ .Values.keycloak.hostname }}"
             - "--proxy-headers={{ .Values.keycloak.proxyHeaders }}"
             - "--http-enabled={{ .Values.keycloak.httpEnabled }}"
+            - "--log=console"
+            - "--log-level={{ .Values.logging.level | default "INFO" }}"
           ports:
             - containerPort: 8080
           env:

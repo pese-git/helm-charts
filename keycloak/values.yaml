@@ -152,3 +152,12 @@ extraEnv: []
 #     periodSeconds: 10
 #     timeoutSeconds: 5
 #     path: /health/ready
+
+# =============================================================================
+# Настройки логирования
+# =============================================================================
+## @section Logging parameters
+logging:
+  ## @param logging.level Уровень логирования
+  ## Возможные значения: FATAL, ERROR, WARN, INFO, DEBUG, TRACE, ALL
+  level: "INFO"
