@@ -38,14 +38,20 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            ## Настройки логирования
+            ## Настройки логирования (согласно официальной документации)
             - name: KC_LOG
               value: "console"
             - name: KC_LOG_LEVEL
               value: "{{ .Values.logging.level | default "INFO" }}"
+            - name: KC_LOG_CONSOLE_OUTPUT
+              value: "{{ .Values.logging.output | default "default" }}"
             # Настройки JVM для логирования
             - name: JAVA_OPTS
               value: "-Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+            {{- range $category, $level := .Values.logging.categories }}
+            - name: KC_LOG_LEVEL_{{ $category | replace "." "_" | upper }}
+              value: "{{ $level }}"
+            {{- end }}
               
             ## Настройки базы данных
             - name: KC_DB

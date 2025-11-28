@@ -161,6 +161,15 @@ logging:
   ## @param logging.level Уровень логирования
   ## Возможные значения: FATAL, ERROR, WARN, INFO, DEBUG, TRACE, ALL
   level: "INFO"
+  ## @param logging.output Формат вывода логов
+  ## Возможные значения: default, json
+  output: "default"
+  ## @param logging.categories Настройки отдельных категорий логирования
+  ## Пример:
+  ## categories:
+  ##   org.hibernate.SQL: "debug"
+  ##   org.keycloak: "info"
+  categories: {}
 
 # =============================================================================
 # Безопасность
