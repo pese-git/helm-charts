@@ -24,11 +24,19 @@ spec:
             - "--hostname={{ .Values.keycloak.hostname }}"
             - "--proxy-headers={{ .Values.keycloak.proxyHeaders }}"
             - "--http-enabled={{ .Values.keycloak.httpEnabled }}"
-            - "--log=console"
-            - "--log-level={{ .Values.logging.level | default "INFO" }}"
+
           ports:
             - containerPort: 8080
           env:
+            ## Настройки логирования
+            - name: KC_LOG
+              value: "console"
+            - name: KC_LOG_LEVEL
+              value: "{{ .Values.logging.level | default "INFO" }}"
+            # Настройки JVM для логирования
+            - name: JAVA_OPTS
+              value: "-Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+              
             ## Настройки базы данных
             - name: KC_DB
               value: "postgres"
