@@ -20,7 +20,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/opt/keycloak/bin/kc.sh"]
           args:
-            - "start"
+            - "start-dev"
             - "--hostname={{ .Values.keycloak.hostname }}"
             - "--proxy-headers={{ .Values.keycloak.proxyHeaders }}"
             - "--http-enabled={{ .Values.keycloak.httpEnabled }}"
