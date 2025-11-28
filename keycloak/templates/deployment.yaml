@@ -21,8 +21,9 @@ spec:
           command: ["/opt/keycloak/bin/kc.sh"]
           args:
             - "start"
-            - "--http-enabled=true"
-            - "--hostname-strict=false"
+            - "--hostname={{ .Values.keycloak.hostname }}"
+            - "--proxy-headers={{ .Values.keycloak.proxyHeaders }}"
+            - "--http-enabled={{ .Values.keycloak.httpEnabled }}"
           ports:
             - containerPort: 8080
           env:

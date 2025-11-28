@@ -15,9 +15,17 @@ ingress:
   className: nginx
   annotations:
     kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
     # cert-manager.io/cluster-issuer: "letsencrypt-prod"   # если используешь cert‑manager + TLS
   tls: false  # если true — нужен секрет TLS, тогда добавь `tlsSecretName`
   tlsSecretName: keycloak-tls
+
+# Keycloak proxy and hostname configuration
+keycloak:
+  hostname: "https://keycloak.example.com"  # Full URL for production
+  proxyHeaders: "xforwarded"                # Use X-Forwarded headers from proxy
+  httpEnabled: true                         # Enable HTTP (will be upgraded to HTTPS by ingress)
 
 resources:
   requests:
@@ -49,13 +57,9 @@ env:
   - name: KC_DB_PASSWORD
     value: "{{ .Values.externalDatabase.password }}"
   - name: KC_HOSTNAME
-    value: "{{ .Values.ingress.host }}"
-  - name: KC_HOSTNAME_PORT
-    value: "443"
-  - name: KC_HOSTNAME_STRICT
-    value: "false"
-  - name: KC_HTTP_ENABLED
-    value: "true"
+    value: "{{ .Values.keycloak.hostname }}"
+  - name: KC_PROXY_HEADERS
+    value: "{{ .Values.keycloak.proxyHeaders }}"
   - name: KEYCLOAK_ADMIN
     value: "admin"
   - name: KEYCLOAK_ADMIN_PASSWORD
