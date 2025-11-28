@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mlflow.fullname" . }}
+  labels:
+    app: {{ include "mlflow.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ include "mlflow.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "mlflow.name" . }}
+    spec:
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
+      containers:
+        - name: mlflow
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+          env:
+            ## Database settings
+            - name: MLFLOW_TRACKING_URI
+              value: "postgresql+psycopg2://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+            - name: OIDC_USERS_DB_URI
+              value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+            
+            ## S3 settings
+            - name: MLFLOW_S3_ENDPOINT_URL
+              value: "{{ .Values.s3.endpoint }}"
+            - name: AWS_ACCESS_KEY_ID
+              {{- if .Values.s3.useSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-s3" (include "mlflow.fullname" .)) .Values.s3.existingSecret }}
+                  key: AWS_ACCESS_KEY_ID
+              {{- else }}
+              value: "{{ .Values.s3.accessKeyId }}"
+              {{- end }}
+            - name: AWS_SECRET_ACCESS_KEY
+              {{- if .Values.s3.useSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-s3" (include "mlflow.fullname" .)) .Values.s3.existingSecret }}
+                  key: AWS_SECRET_ACCESS_KEY
+              {{- else }}
+              value: "{{ .Values.s3.secretAccessKey }}"
+              {{- end }}
+            - name: MLFLOW_S3_IGNORE_TLS
+              value: "true"
+            - name: MLFLOW_DEFAULT_ARTIFACT_ROOT
+              value: "s3://{{ .Values.s3.bucket }}"
+            
+            ## OIDC settings
+            - name: OIDC_DISCOVERY_URL
+              value: "{{ .Values.oidc.discoveryURL }}"
+            - name: OIDC_CLIENT_ID
+              {{- if .Values.oidc.useSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-oidc" (include "mlflow.fullname" .)) .Values.oidc.existingSecret }}
+                  key: OIDC_CLIENT_ID
+              {{- else }}
+              value: "{{ .Values.oidc.clientId }}"
+              {{- end }}
+            - name: OIDC_CLIENT_SECRET
+              {{- if .Values.oidc.useSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-oidc" (include "mlflow.fullname" .)) .Values.oidc.existingSecret }}
+                  key: OIDC_CLIENT_SECRET
+              {{- else }}
+              value: "{{ .Values.oidc.clientSecret }}"
+              {{- end }}
+            - name: OIDC_REDIRECT_URI
+              value: "{{ include "mlflow.redirectURI" . }}"
+            - name: OIDC_SCOPE
+              value: "{{ .Values.oidc.scope }}"
+            - name: OIDC_PROVIDER_DISPLAY_NAME
+              value: "{{ .Values.oidc.providerName }}"
+            - name: OIDC_GROUPS_ATTRIBUTE
+              value: "{{ .Values.oidc.groupsAttribute }}"
+            - name: OIDC_ADMIN_GROUP_NAME
+              value: "{{ .Values.oidc.adminGroupName }}"
+            - name: DEFAULT_MLFLOW_PERMISSION
+              value: "{{ .Values.oidc.defaultPermission }}"
+            - name: LOG_LEVEL
+              value: "INFO"
+            
+            ## Additional environment variables
+            {{- range .Values.extraEnv }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+            {{- end }}
+            
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
