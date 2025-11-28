@@ -62,10 +62,23 @@ spec:
               value: "{{ .Values.externalDatabase.port }}"
             - name: KC_DB_URL_DATABASE
               value: "{{ .Values.externalDatabase.database }}"
+            {{- if .Values.externalDatabase.useSecret }}
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-db" (include "keycloak.fullname" .)) .Values.externalDatabase.existingSecret }}
+                  key: DB_USERNAME
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-db" (include "keycloak.fullname" .)) .Values.externalDatabase.existingSecret }}
+                  key: DB_PASSWORD
+            {{- else }}
             - name: KC_DB_USERNAME
               value: "{{ .Values.externalDatabase.username }}"
             - name: KC_DB_PASSWORD
               value: "{{ .Values.externalDatabase.password }}"
+            {{- end }}
               
             ## Настройки прокси и хоста
             - name: KC_HOSTNAME

@@ -99,6 +99,11 @@ externalDatabase:
   password: "secret"
   ## @param externalDatabase.database Имя базы данных
   database: "keycloak"
+  ## @param externalDatabase.useSecret Использовать ли Secret для хранения учетных данных БД
+  useSecret: false
+  ## @param externalDatabase.existingSecret Имя существующего Secret для учетных данных БД
+  ## Secret должен содержать ключи DB_USERNAME и DB_PASSWORD
+  existingSecret: ""
 
 # =============================================================================
 # Администратор Keycloak
