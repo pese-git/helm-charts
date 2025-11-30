@@ -30,14 +30,20 @@ spec:
         - name: mlflow
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          # Используем рекомендуемый способ запуска MLflow
+          # Используем shell-обертку для более надежного запуска
           command:
-            - "mlflow"
-            - "server"
-            - "--host=0.0.0.0"
-            - "--port=8080"
-            - "--backend-store-uri=postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
-            - "--default-artifact-root=s3://{{ .Values.s3.bucket }}"
+            - "/bin/sh"
+            - "-c"
+            - |
+              set -e
+              echo "Starting MLflow server with debug logging..."
+              mlflow server \
+                --host=0.0.0.0 \
+                --port=8080 \
+                --backend-store-uri="postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}" \
+                --default-artifact-root="s3://{{ .Values.s3.bucket }}" \
+                --allowed-hosts="*" \
+                --cors-allowed-origins="*"
           ports:
             - containerPort: 8080
           env:
@@ -71,6 +77,12 @@ spec:
             - name: MLFLOW_S3_IGNORE_TLS
               value: "true"
             
+            ## Debugging settings
+            - name: MLFLOW_ENABLE_LOGGING
+              value: "true"
+            - name: LOG_LEVEL
+              value: "DEBUG"
+              
             ## OIDC settings
             - name: OIDC_DISCOVERY_URL
               value: "{{ .Values.oidc.discoveryURL }}"
@@ -120,16 +132,18 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
+          # MLflow не имеет стандартного /health эндпоинта, используем корневой путь
           livenessProbe:
             httpGet:
-              path: /health
+              path: /
               port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 60  # Увеличиваем время для полной инициализации
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
+              path: /
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
