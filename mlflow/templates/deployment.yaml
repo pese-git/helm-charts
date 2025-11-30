@@ -30,27 +30,22 @@ spec:
         - name: mlflow
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          # Явно указываем команду запуска MLflow сервера
+          # Используем рекомендуемый способ запуска MLflow
           command:
-            - "python"
-            - "-m"
             - "mlflow"
             - "server"
             - "--host=0.0.0.0"
             - "--port=8080"
-            - "--backend-store-uri=postgresql+psycopg2://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+            - "--backend-store-uri=postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
             - "--default-artifact-root=s3://{{ .Values.s3.bucket }}"
-            - "--artifacts-destination=s3://{{ .Values.s3.bucket }}"
           ports:
             - containerPort: 8080
           env:
             ## Database settings
             - name: MLFLOW_TRACKING_URI
-              value: "postgresql+psycopg2://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+              value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
             - name: OIDC_USERS_DB_URI
               value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
-            - name: MLFLOW_BACKEND_STORE_URI
-              value: "postgresql+psycopg2://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
             
             ## S3 settings
             - name: MLFLOW_S3_ENDPOINT_URL
@@ -75,14 +70,6 @@ spec:
               {{- end }}
             - name: MLFLOW_S3_IGNORE_TLS
               value: "true"
-            - name: MLFLOW_DEFAULT_ARTIFACT_ROOT
-              value: "s3://{{ .Values.s3.bucket }}"
-            - name: MLFLOW_ARTIFACT_STORE
-              value: "s3"
-            # Важно! Эта переменная гарантирует, что MLflow будет использовать
-            # только указанное хранилище артефактов
-            - name: MLFLOW_ARTIFACTS_DESTINATION
-              value: "s3://{{ .Values.s3.bucket }}"
             
             ## OIDC settings
             - name: OIDC_DISCOVERY_URL
