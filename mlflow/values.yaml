@@ -129,17 +129,17 @@ oidc:
 # =============================================================================
 ## Ограничения ресурсов для контейнера MLflow
 ## @section Resource parameters
-resources:
-  ## @param resources.requests.cpu Запрос CPU ресурсов
-  ## @param resources.requests.memory Запрос памяти
-  requests:
-    cpu: 200m
-    memory: 256Mi
-  ## @param resources.limits.cpu Лимит CPU ресурсов
-  ## @param resources.limits.memory Лимит памяти
-  limits:
-    cpu: 500m
-    memory: 512Mi
+#resources:
+#  ## @param resources.requests.cpu Запрос CPU ресурсов
+#  ## @param resources.requests.memory Запрос памяти
+#  requests:
+#    cpu: 200m
+#    memory: 256Mi
+#  ## @param resources.limits.cpu Лимит CPU ресурсов
+#  ## @param resources.limits.memory Лимит памяти
+#  limits:
+#    cpu: 500m
+#    memory: 512Mi
 
 # =============================================================================
 # Дополнительные переменные окружения (опционально)
