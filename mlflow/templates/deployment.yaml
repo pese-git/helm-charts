@@ -50,7 +50,7 @@ spec:
             - name: MLFLOW_TRACKING_URI
               value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
             - name: OIDC_USERS_DB_URI
-              value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+              value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.usersDbName | default "mlflow_users" }}"
             
             ## S3 settings
             - name: MLFLOW_S3_ENDPOINT_URL

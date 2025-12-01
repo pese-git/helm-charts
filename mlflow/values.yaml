@@ -58,8 +58,11 @@ database:
   host: "postgres.example.com"
   ## @param database.port Порт базы данных PostgreSQL
   port: 5432
-  ## @param database.name Имя базы данных
+  ## @param database.name Имя базы данных для метаданных MLflow
   name: "mlflow"
+  ## @param database.usersDbName Имя базы данных для пользователей OIDC
+  ## Если не указано, будет использовано значение mlflow_users
+  usersDbName: "mlflow_users"
   ## @param database.username Имя пользователя БД
   username: "mlflow"
   ## @param database.password Пароль пользователя БД
@@ -109,7 +112,7 @@ oidc:
   ## Если не указан, будет сгенерирован на основе ingress.host
   redirectURI: ""
   ## @param oidc.scope Области доступа, запрашиваемые у OIDC провайдера
-  scope: "openid,email,profile"
+  scope: "openid profile email groups"
   ## @param oidc.providerName Отображаемое имя OIDC провайдера
   providerName: "Keycloak"
   
@@ -151,8 +154,8 @@ resources:
   ## @param resources.limits.cpu Лимит CPU ресурсов
   ## @param resources.limits.memory Лимит памяти
   limits:
-    cpu: 250m
-    memory: 256Mi
+    cpu: 500m
+    memory: 1024Mi
 
 # =============================================================================
 # Дополнительные переменные окружения (опционально)
