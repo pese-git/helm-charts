@@ -84,11 +84,13 @@ spec:
               value: "true"
             - name: LOG_LEVEL
               value: "DEBUG"
-            ## Skip Alembic migrations
+            ## Alembic configuration
             - name: SKIP_MIGRATIONS
               value: "true"
             - name: OIDC_SKIP_MIGRATIONS
               value: "true"
+            - name: OIDC_ALEMBIC_VERSION_TABLE
+              value: "oidc_migrations"
               
             ## OIDC core settings
             - name: OIDC_DISCOVERY_URL
