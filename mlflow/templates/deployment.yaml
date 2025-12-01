@@ -35,7 +35,7 @@ spec:
             - "/bin/sh"
             - "-c"
             - |
-              mlflow server \
+              python -m mlflow_oidc_auth.server \
                 --host=0.0.0.0 \
                 --port=8080 \
                 --backend-store-uri="postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}" \
@@ -81,7 +81,7 @@ spec:
             - name: LOG_LEVEL
               value: "DEBUG"
               
-            ## OIDC settings
+            ## OIDC core settings
             - name: OIDC_DISCOVERY_URL
               value: "{{ .Values.oidc.discoveryURL }}"
             - name: OIDC_CLIENT_ID
@@ -108,12 +108,26 @@ spec:
               value: "{{ .Values.oidc.scope }}"
             - name: OIDC_PROVIDER_DISPLAY_NAME
               value: "{{ .Values.oidc.providerName }}"
+            
+            ## OIDC groups and permissions
             - name: OIDC_GROUPS_ATTRIBUTE
               value: "{{ .Values.oidc.groupsAttribute }}"
+            - name: OIDC_GROUP_NAME
+              value: "{{ .Values.oidc.groupName | default "mlflow" }}"
             - name: OIDC_ADMIN_GROUP_NAME
               value: "{{ .Values.oidc.adminGroupName }}"
             - name: DEFAULT_MLFLOW_PERMISSION
               value: "{{ .Values.oidc.defaultPermission }}"
+            
+            ## OIDC security and behavior
+            - name: SECRET_KEY
+              value: "{{ .Values.oidc.secretKey | default (randAlphaNum 32) }}"
+            - name: AUTOMATIC_LOGIN_REDIRECT
+              value: "{{ .Values.oidc.automaticLoginRedirect | default "true" }}"
+            - name: EXTEND_MLFLOW_MENU
+              value: "true"
+            - name: DEFAULT_LANDING_PAGE_IS_PERMISSIONS
+              value: "true"
             - name: LOG_LEVEL
               value: "INFO"
             

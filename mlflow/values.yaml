@@ -112,12 +112,25 @@ oidc:
   scope: "openid,email,profile"
   ## @param oidc.providerName Отображаемое имя OIDC провайдера
   providerName: "Keycloak"
+  
+  ## Настройки групп и прав доступа
   ## @param oidc.groupsAttribute Атрибут с группами в токене
   groupsAttribute: "groups"
+  ## @param oidc.groupName Названия групп, которым разрешен доступ (через delimiter)
+  groupName: "mlflow"
   ## @param oidc.adminGroupName Название группы администраторов
   adminGroupName: "mlflow-admin"
   ## @param oidc.defaultPermission Права по умолчанию
   defaultPermission: "MANAGE"
+  
+  ## Настройки безопасности и поведения
+  ## @param oidc.secretKey Секретный ключ для подписи сессий
+  ## Если не указан, будет сгенерирован случайный ключ
+  secretKey: ""
+  ## @param oidc.automaticLoginRedirect Автоматически перенаправлять на страницу входа
+  automaticLoginRedirect: true
+  
+  ## Настройки хранения секретов
   ## @param oidc.useSecret Использовать ли Secret для хранения данных OIDC
   useSecret: false
   ## @param oidc.existingSecret Имя существующего Secret для данных OIDC
@@ -129,17 +142,17 @@ oidc:
 # =============================================================================
 ## Ограничения ресурсов для контейнера MLflow
 ## @section Resource parameters
-#resources:
-#  ## @param resources.requests.cpu Запрос CPU ресурсов
-#  ## @param resources.requests.memory Запрос памяти
-#  requests:
-#    cpu: 200m
-#    memory: 256Mi
-#  ## @param resources.limits.cpu Лимит CPU ресурсов
-#  ## @param resources.limits.memory Лимит памяти
-#  limits:
-#    cpu: 500m
-#    memory: 512Mi
+resources:
+  ## @param resources.requests.cpu Запрос CPU ресурсов
+  ## @param resources.requests.memory Запрос памяти
+  requests:
+    cpu: 125m
+    memory: 128Mi
+  ## @param resources.limits.cpu Лимит CPU ресурсов
+  ## @param resources.limits.memory Лимит памяти
+  limits:
+    cpu: 250m
+    memory: 256Mi
 
 # =============================================================================
 # Дополнительные переменные окружения (опционально)
