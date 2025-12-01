@@ -49,8 +49,11 @@ spec:
             ## Database settings
             - name: MLFLOW_TRACKING_URI
               value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+            # Настройка базы данных пользователей
             - name: OIDC_USERS_DB_URI
               value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.usersDbName | default "mlflow_users" }}"
+            - name: CREATE_USERS_DB
+              value: "true"
             
             ## S3 settings
             - name: MLFLOW_S3_ENDPOINT_URL
@@ -83,6 +86,8 @@ spec:
               value: "DEBUG"
             ## Skip Alembic migrations
             - name: SKIP_MIGRATIONS
+              value: "true"
+            - name: OIDC_SKIP_MIGRATIONS
               value: "true"
               
             ## OIDC core settings
