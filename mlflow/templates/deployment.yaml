@@ -90,7 +90,7 @@ spec:
             - name: OIDC_SKIP_MIGRATIONS
               value: "true"
             - name: OIDC_ALEMBIC_VERSION_TABLE
-              value: "oidc_migrations"
+              value: "alembic_version"
               
             ## OIDC core settings
             - name: OIDC_DISCOVERY_URL
