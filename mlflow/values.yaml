@@ -168,6 +168,13 @@ resources:
 ##   - name: LOG_LEVEL
 ##     value: "DEBUG"
 ##
+#extraEnv:
+#- name: SKIP_MIGRATIONS
+#  value: 'true'
+#- name: OIDC_SKIP_MIGRATIONS
+#  value: 'false'
+#- name: OIDC_ALEMBIC_VERSION_TABLE
+#  value: oidc_alembic_version
 extraEnv: []
 
 # =============================================================================
