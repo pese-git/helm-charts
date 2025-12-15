@@ -1,0 +1,195 @@
+# =============================================================================
+# Общие настройки MLflow
+# =============================================================================
+## Количество реплик для развертывания MLflow
+## @param replicaCount Количество подов MLflow
+replicaCount: 1
+
+## Настройки образа MLflow
+## @section Image parameters
+image:
+  ## @param image.repository Репозиторий с образом MLflow
+  repository: harbor.openidealab.com/mlflow/mlflow-oidc
+  ## @param image.tag Тег образа MLflow (версия)
+  tag: "latest"
+  ## @param image.pullPolicy Политика загрузки образа
+  pullPolicy: IfNotPresent
+
+# =============================================================================
+# Сетевые настройки
+# =============================================================================
+## Настройки Kubernetes Service
+## @section Service parameters
+service:
+  ## @param service.type Тип службы Kubernetes
+  ## Возможные значения: ClusterIP, NodePort, LoadBalancer
+  type: ClusterIP
+  ## @param service.port Порт, на котором будет доступен MLflow
+  port: 8080
+
+## Настройки Ingress
+## @section Ingress parameters
+ingress:
+  ## @param ingress.enabled Включить Ingress для MLflow
+  enabled: true
+  ## @param ingress.host Имя хоста для доступа к MLflow
+  host: mlflow.example.com
+  ## @param ingress.className Класс Ingress контроллера
+  className: nginx
+  ## @param ingress.annotations Аннотации для Ingress ресурса
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"   # Раскомментировать для автоматического получения TLS сертификата
+  ## @param ingress.tls Включить TLS для Ingress
+  tls: false
+  ## @param ingress.tlsSecretName Имя секрета с TLS сертификатом 
+  ## (обязательно указать, если tls: true)
+  tlsSecretName: mlflow-tls
+
+# =============================================================================
+# Настройки базы данных
+# =============================================================================
+## Настройки внешней базы данных PostgreSQL
+## @section Database parameters
+database:
+  ## @param database.host Хост базы данных PostgreSQL
+  host: "postgres.example.com"
+  ## @param database.port Порт базы данных PostgreSQL
+  port: 5432
+  ## @param database.name Имя базы данных для метаданных MLflow
+  name: "mlflow"
+  ## @param database.usersDbName Имя базы данных для пользователей OIDC
+  ## Если не указано, будет использовано значение mlflow_users
+  usersDbName: "mlflow_users"
+  ## @param database.username Имя пользователя БД
+  username: "mlflow"
+  ## @param database.password Пароль пользователя БД
+  ## ВАЖНО: для продакшна рекомендуется использовать Kubernetes Secret
+  password: "password"
+  ## @param database.useSecret Использовать ли Secret для хранения учетных данных БД
+  useSecret: false
+  ## @param database.existingSecret Имя существующего Secret для учетных данных БД
+  ## Secret должен содержать ключи DB_USERNAME и DB_PASSWORD
+  existingSecret: ""
+
+# =============================================================================
+# Настройки S3 (Minio)
+# =============================================================================
+## Настройки внешнего S3-совместимого хранилища
+## @section S3 parameters
+s3:
+  ## @param s3.endpoint URL конечной точки S3 (Minio)
+  endpoint: "http://minio.example.com:9000"
+  ## @param s3.bucket Имя корзины в S3
+  bucket: "mlflow"
+  ## @param s3.accessKeyId Ключ доступа S3
+  accessKeyId: "minioadmin"
+  ## @param s3.secretAccessKey Секретный ключ S3
+  ## ВАЖНО: для продакшна рекомендуется использовать Kubernetes Secret
+  secretAccessKey: "minioadmin"
+  ## @param s3.useSecret Использовать ли Secret для хранения учетных данных S3
+  useSecret: false
+  ## @param s3.existingSecret Имя существующего Secret для учетных данных S3
+  ## Secret должен содержать ключи AWS_ACCESS_KEY_ID и AWS_SECRET_ACCESS_KEY
+  existingSecret: ""
+
+# =============================================================================
+# Настройки OIDC
+# =============================================================================
+## Настройки OIDC аутентификации
+## @section OIDC parameters
+oidc:
+  ## @param oidc.discoveryURL URL для обнаружения OIDC провайдера
+  discoveryURL: "https://keycloak.example.com/realms/mlflow/.well-known/openid-configuration"
+  ## @param oidc.clientId ID клиента OIDC
+  clientId: "mlflow"
+  ## @param oidc.clientSecret Секрет клиента OIDC
+  ## ВАЖНО: для продакшна рекомендуется использовать Kubernetes Secret
+  clientSecret: "secret"
+  ## @param oidc.redirectURI URI перенаправления после аутентификации
+  ## Если не указан, будет сгенерирован на основе ingress.host
+  redirectURI: ""
+  ## @param oidc.scope Области доступа, запрашиваемые у OIDC провайдера
+  scope: "openid profile email groups"
+  ## @param oidc.providerName Отображаемое имя OIDC провайдера
+  providerName: "Keycloak"
+  
+  ## Настройки групп и прав доступа
+  ## @param oidc.groupsAttribute Атрибут с группами в токене
+  groupsAttribute: "groups"
+  ## @param oidc.groupName Названия групп, которым разрешен доступ (через delimiter)
+  groupName: "mlflow"
+  ## @param oidc.adminGroupName Название группы администраторов
+  adminGroupName: "mlflow-admin"
+  ## @param oidc.defaultPermission Права по умолчанию
+  defaultPermission: "MANAGE"
+  
+  ## Настройки безопасности и поведения
+  ## @param oidc.secretKey Секретный ключ для подписи сессий
+  ## Если не указан, будет сгенерирован случайный ключ
+  secretKey: ""
+  ## @param oidc.automaticLoginRedirect Автоматически перенаправлять на страницу входа
+  automaticLoginRedirect: true
+  
+  ## Настройки хранения секретов
+  ## @param oidc.useSecret Использовать ли Secret для хранения данных OIDC
+  useSecret: false
+  ## @param oidc.existingSecret Имя существующего Secret для данных OIDC
+  ## Secret должен содержать ключи OIDC_CLIENT_ID и OIDC_CLIENT_SECRET
+  existingSecret: ""
+
+# =============================================================================
+# Ресурсы и масштабирование
+# =============================================================================
+## Ограничения ресурсов для контейнера MLflow
+## @section Resource parameters
+resources:
+  ## @param resources.requests.cpu Запрос CPU ресурсов
+  ## @param resources.requests.memory Запрос памяти
+  requests:
+    cpu: 125m
+    memory: 128Mi
+  ## @param resources.limits.cpu Лимит CPU ресурсов
+  ## @param resources.limits.memory Лимит памяти
+  limits:
+    cpu: 500m
+    memory: 1024Mi
+
+# =============================================================================
+# Дополнительные переменные окружения (опционально)
+# =============================================================================
+## Дополнительные переменные окружения для MLflow
+## @section Extra environment variables
+##
+## Пример:
+## extraEnv:
+##   - name: LOG_LEVEL
+##     value: "DEBUG"
+##
+#extraEnv:
+#- name: SKIP_MIGRATIONS
+#  value: 'true'
+#- name: OIDC_SKIP_MIGRATIONS
+#  value: 'false'
+#- name: OIDC_ALEMBIC_VERSION_TABLE
+#  value: oidc_alembic_version
+extraEnv: []
+
+# =============================================================================
+# Настройки безопасности
+# =============================================================================
+## @section Security parameters
+## Настройки контекста безопасности для подов
+securityContext:
+  ## @param securityContext.enabled Включить настройки securityContext
+  enabled: true
+  ## @param securityContext.runAsNonRoot Запретить запуск от имени пользователя root
+  runAsNonRoot: true
+  ## @param securityContext.runAsUser ID пользователя для запуска контейнера
+  runAsUser: 1000
+  ## @param securityContext.runAsGroup ID группы для запуска контейнера
+  runAsGroup: 1000
+  ## @param securityContext.fsGroup ID группы для файловой системы
+  fsGroup: 1000

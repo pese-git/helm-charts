@@ -1,0 +1,77 @@
+======================================================================================
+   MLflow успешно установлен!
+======================================================================================
+
+Ваш MLflow доступен по адресу:
+{{- if .Values.ingress.enabled }}
+  http{{ if .Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.host }}
+{{- else }}
+  Для доступа к MLflow без Ingress, выполните следующие команды:
+  
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ include "mlflow.name" . }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+  
+  После этого MLflow будет доступен по адресу http://127.0.0.1:8080
+{{- end }}
+
+======================================================================================
+Информация о конфигурации:
+======================================================================================
+
+База данных:
+  Хост:     {{ .Values.database.host }}:{{ .Values.database.port }}
+  База:     {{ .Values.database.name }}
+  {{- if not .Values.database.useSecret }}
+  Пользователь: {{ .Values.database.username }}
+  {{- else }}
+  Пользователь: [хранится в Secret: {{ default (printf "%s-db" (include "mlflow.fullname" .)) .Values.database.existingSecret }}]
+  {{- end }}
+
+S3 хранилище:
+  Endpoint: {{ .Values.s3.endpoint }}
+  Bucket:   {{ .Values.s3.bucket }}
+  {{- if not .Values.s3.useSecret }}
+  Access Key ID: {{ .Values.s3.accessKeyId }}
+  {{- else }}
+  Access Key ID: [хранится в Secret: {{ default (printf "%s-s3" (include "mlflow.fullname" .)) .Values.s3.existingSecret }}]
+  {{- end }}
+
+OIDC:
+  Discovery URL: {{ .Values.oidc.discoveryURL }}
+  Redirect URI:  {{ include "mlflow.redirectURI" . }}
+  Provider Name: {{ .Values.oidc.providerName }}
+  Admin Group:   {{ .Values.oidc.adminGroupName }}
+
+======================================================================================
+Рекомендации по безопасности:
+======================================================================================
+
+1. Настройте TLS для защищенного соединения
+{{- if not .Values.ingress.tls }}
+   - Включите параметр ingress.tls: true
+   - Укажите ingress.tlsSecretName: имя-секрета-с-сертификатом
+{{- end }}
+2. Для производственного использования храните пароли в Kubernetes Secrets:
+{{- if not .Values.database.useSecret }}
+   - Включите database.useSecret: true для защиты учетных данных базы данных
+{{- end }}
+{{- if not .Values.s3.useSecret }}
+   - Включите s3.useSecret: true для защиты учетных данных S3
+{{- end }}
+{{- if not .Values.oidc.useSecret }}
+   - Включите oidc.useSecret: true для защиты данных OIDC клиента
+{{- end }}
+
+======================================================================================
+Дополнительные команды:
+======================================================================================
+
+Получить статус релиза:
+  $ helm status {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+Обновить релиз:
+  $ helm upgrade {{ .Release.Name }} -n {{ .Release.Namespace }} .
+
+Удалить релиз:
+  $ helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}

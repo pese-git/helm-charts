@@ -1,0 +1,173 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mlflow.fullname" . }}
+  labels:
+    app: {{ include "mlflow.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ include "mlflow.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "mlflow.name" . }}
+    spec:
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
+      containers:
+        - name: mlflow
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # Используем shell-обертку для более надежного запуска
+          command:
+            - "/bin/sh"
+            - "-c"
+            - |
+              mlflow server \
+                --app-name oidc-auth \
+                --host=0.0.0.0 \
+                --port=8080 \
+                --backend-store-uri="postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}" \
+                --default-artifact-root="s3://{{ .Values.s3.bucket }}" \
+                --allowed-hosts="*" \
+                --cors-allowed-origins="*"
+          ports:
+            - containerPort: 8080
+          env:
+            ## Database settings
+            - name: MLFLOW_TRACKING_URI
+              value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+            # Настройка базы данных пользователей
+            - name: OIDC_USERS_DB_URI
+              value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.usersDbName | default "mlflow_users" }}"
+            - name: CREATE_USERS_DB
+              value: "true"
+            
+            ## S3 settings
+            - name: MLFLOW_S3_ENDPOINT_URL
+              value: "{{ .Values.s3.endpoint }}"
+            - name: AWS_ACCESS_KEY_ID
+              {{- if .Values.s3.useSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-s3" (include "mlflow.fullname" .)) .Values.s3.existingSecret }}
+                  key: AWS_ACCESS_KEY_ID
+              {{- else }}
+              value: "{{ .Values.s3.accessKeyId }}"
+              {{- end }}
+            - name: AWS_SECRET_ACCESS_KEY
+              {{- if .Values.s3.useSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-s3" (include "mlflow.fullname" .)) .Values.s3.existingSecret }}
+                  key: AWS_SECRET_ACCESS_KEY
+              {{- else }}
+              value: "{{ .Values.s3.secretAccessKey }}"
+              {{- end }}
+            - name: MLFLOW_S3_IGNORE_TLS
+              value: "true"
+            
+            ## Debugging settings
+            - name: MLFLOW_ENABLE_LOGGING
+              value: "true"
+            - name: LOG_LEVEL
+              value: "DEBUG"
+            ## Alembic configuration
+            - name: SKIP_MIGRATIONS
+              value: "true"
+            - name: OIDC_SKIP_MIGRATIONS
+              value: "true"
+            ## OIDC core settings
+            - name: OIDC_DISCOVERY_URL
+              value: "{{ .Values.oidc.discoveryURL }}"
+            - name: OIDC_CLIENT_ID
+              {{- if .Values.oidc.useSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-oidc" (include "mlflow.fullname" .)) .Values.oidc.existingSecret }}
+                  key: OIDC_CLIENT_ID
+              {{- else }}
+              value: "{{ .Values.oidc.clientId }}"
+              {{- end }}
+            - name: OIDC_CLIENT_SECRET
+              {{- if .Values.oidc.useSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-oidc" (include "mlflow.fullname" .)) .Values.oidc.existingSecret }}
+                  key: OIDC_CLIENT_SECRET
+              {{- else }}
+              value: "{{ .Values.oidc.clientSecret }}"
+              {{- end }}
+            - name: OIDC_REDIRECT_URI
+              value: "{{ include "mlflow.redirectURI" . }}"
+            - name: OIDC_SCOPE
+              value: "{{ .Values.oidc.scope }}"
+            - name: OIDC_PROVIDER_DISPLAY_NAME
+              value: "{{ .Values.oidc.providerName }}"
+            
+            ## OIDC groups and permissions
+            - name: OIDC_GROUPS_ATTRIBUTE
+              value: "{{ .Values.oidc.groupsAttribute }}"
+            - name: OIDC_GROUP_NAME
+              value: "{{ .Values.oidc.groupName | default "mlflow" }}"
+            - name: OIDC_ADMIN_GROUP_NAME
+              value: "{{ .Values.oidc.adminGroupName }}"
+            - name: DEFAULT_MLFLOW_PERMISSION
+              value: "{{ .Values.oidc.defaultPermission }}"
+            
+            ## OIDC security and behavior
+            - name: SECRET_KEY
+              value: "{{ .Values.oidc.secretKey | default (randAlphaNum 32) }}"
+            - name: AUTOMATIC_LOGIN_REDIRECT
+              value: "{{ .Values.oidc.automaticLoginRedirect | default "true" }}"
+            - name: EXTEND_MLFLOW_MENU
+              value: "true"
+            - name: DEFAULT_LANDING_PAGE_IS_PERMISSIONS
+              value: "true"
+            ## Database configuration
+            - name: OIDC_ALEMBIC_VERSION_TABLE
+              value: "oidc_alembic_version"
+            - name: LOG_LEVEL
+              value: "DEBUG"
+            
+            ## Additional environment variables
+            {{- range .Values.extraEnv }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+            {{- end }}
+            
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+          # MLflow не имеет стандартного /health эндпоинта, используем корневой путь
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60  # Увеличиваем время для полной инициализации
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5

@@ -1,0 +1,15 @@
+apiVersion: v2
+name: mlflow
+description: A Helm chart for MLflow with OIDC authentication
+type: application
+version: 0.1.11
+appVersion: "latest"
+keywords:
+  - mlflow
+  - machine learning
+  - tracking
+  - model registry
+  - oidc
+maintainers:
+  - name: OpenIdeaLab
+    url: https://openidealab.com
