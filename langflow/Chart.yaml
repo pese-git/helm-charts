@@ -1,0 +1,7 @@
+apiVersion: v2
+name: langflow
+description: Langflow with PostgreSQL
+version: 0.1.0
+appVersion: "latest"
+type: application
+icon: https://raw.githubusercontent.com/langflow-ai/langflow/main/docs/assets/langflow-logo.png

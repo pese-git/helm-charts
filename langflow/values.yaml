@@ -1,0 +1,24 @@
+langflow:
+  image: langflowai/langflow:latest
+  replicas: 1
+  port: 7860
+
+
+  env:
+    LANGFLOW_HOST: 0.0.0.0
+    LANGFLOW_PORT: 7860
+    LANGFLOW_AUTO_LOGIN: "false"
+    LANGFLOW_SUPERUSER: admin
+
+
+externalPostgres:
+  enabled: true
+  host: 10.0.10.5
+  port: 5432
+  database: langflow
+  user: langflow
+  password: langflow_secret
+
+
+service:
+  type: ClusterIP
