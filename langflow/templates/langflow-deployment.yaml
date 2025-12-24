@@ -17,6 +17,8 @@ spec:
         image: {{ .Values.langflow.image }}
         ports:
           - containerPort: {{ .Values.langflow.port }}
+        resources:
+          {{- toYaml .Values.langflow.resources | nindent 10 }}
         envFrom:
           - secretRef:
             name: {{ include "langflow.fullname" . }}-secret
