@@ -1,0 +1,5 @@
+apiVersion: v2
+name: litellm
+description: Helm chart for litellm proxy with external PostgreSQL and optional ingress
+version: 0.1.0
+appVersion: "latest"
