@@ -26,8 +26,10 @@ spec:
           ports:
             - containerPort: 4000
           env:
-            - name: STORE_MODEL_IN_DB
-              value: {{ .Values.env.STORE_MODEL_IN_DB | quote }}
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
             - name: DB_USER
               valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-secret, key: DB_USER}}
             - name: DB_PASSWORD
@@ -40,6 +42,18 @@ spec:
               valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-secret, key: DB_NAME}}
             - name: DATABASE_URL
               value: "postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
+            {{- if .Values.secretEnv.litellm_master_key }}
+            - name: LITELLM_MASTER_KEY
+              valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-litellm-secret, key: LITELLM_MASTER_KEY}}
+            {{- end }}
+            {{- if .Values.secretEnv.litellm_ui_username }}
+            - name: UI_USERNAME
+              valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-litellm-secret, key: UI_USERNAME}}
+            {{- end }}
+            {{- if .Values.secretEnv.litellm_ui_password }}
+            - name: UI_PASSWORD
+              valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-litellm-secret, key: UI_PASSWORD}}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health/liveliness
