@@ -44,15 +44,15 @@ spec:
               value: "postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
             {{- if .Values.secretEnv.litellm_master_key }}
             - name: LITELLM_MASTER_KEY
-              valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-litellm-secret, key: LITELLM_MASTER_KEY}}
+              valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-auth-secret, key: LITELLM_MASTER_KEY}}
             {{- end }}
             {{- if .Values.secretEnv.litellm_ui_username }}
             - name: UI_USERNAME
-              valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-litellm-secret, key: UI_USERNAME}}
+              valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-auth-secret, key: UI_USERNAME}}
             {{- end }}
             {{- if .Values.secretEnv.litellm_ui_password }}
             - name: UI_PASSWORD
-              valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-litellm-secret, key: UI_PASSWORD}}
+              valueFrom: {secretKeyRef: {name: {{ include "litellm.fullname" . }}-auth-secret, key: UI_PASSWORD}}
             {{- end }}
           livenessProbe:
             httpGet:
