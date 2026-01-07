@@ -43,6 +43,8 @@ services:
       AGENT_RUNTIME__INTERNAL_API_KEY: "dev-api-key"
   
   gateway:
+    env:
+      GATEWAY__USE_JWT_AUTH: "false"
     secrets:
       GATEWAY__INTERNAL_API_KEY: "dev-api-key"
   

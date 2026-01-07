@@ -150,7 +150,7 @@ services:
       GATEWAY__WS_CLOSE_TIMEOUT: "10"
       GATEWAY__MAX_CONCURRENT_REQUESTS: "100"
       GATEWAY__REQUEST_TIMEOUT: "30"
-      GATEWAY__USE_JWT_AUTH: "false"
+      GATEWAY__USE_JWT_AUTH: "true"
     secrets:
       GATEWAY__INTERNAL_API_KEY: "change-me-in-production"
     healthcheck:
