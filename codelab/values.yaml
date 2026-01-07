@@ -7,6 +7,12 @@ environment: development
 ## @param replicaCount Количество реплик для каждого сервиса (по умолчанию)
 replicaCount: 1
 
+## @param imagePullSecrets Секреты для доступа к приватным registry
+## Пример:
+## imagePullSecrets:
+##   - name: harbor-registry
+imagePullSecrets: []
+
 # =============================================================================
 # Настройки образов
 # =============================================================================

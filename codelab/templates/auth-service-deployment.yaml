@@ -18,6 +18,10 @@ spec:
         {{- include "codelab.selectorLabels" . | nindent 8 }}
         {{- include "codelab.componentLabels" "auth-service" | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if .Values.securityContext.enabled }}
       securityContext:
         runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}

@@ -20,9 +20,6 @@ spec:
     spec:
       {{- if .Values.securityContext.enabled }}
       securityContext:
-        runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
-        runAsUser: {{ .Values.securityContext.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.runAsGroup }}
         fsGroup: {{ .Values.securityContext.fsGroup }}
       {{- end }}
       containers:
