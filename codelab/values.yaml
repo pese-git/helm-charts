@@ -13,25 +13,25 @@ replicaCount: 1
 images:
   ## Настройки образа auth-service
   authService:
-    repository: your-registry/auth-service
+    repository: harbor.openidealab.com/codelab/auth-service
     tag: latest
     pullPolicy: IfNotPresent
   
   ## Настройки образа gateway
   gateway:
-    repository: your-registry/gateway
+    repository: harbor.openidealab.com/codelab/gateway
     tag: latest
     pullPolicy: IfNotPresent
   
   ## Настройки образа agent-runtime
   agentRuntime:
-    repository: your-registry/agent-runtime
+    repository: harbor.openidealab.com/codelab/agent-runtime
     tag: latest
     pullPolicy: IfNotPresent
   
   ## Настройки образа llm-proxy
   llmProxy:
-    repository: your-registry/llm-proxy
+    repository: harbor.openidealab.com/codelab/llm-proxy
     tag: latest
     pullPolicy: IfNotPresent
   

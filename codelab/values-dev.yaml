@@ -2,6 +2,21 @@
 environment: development
 replicaCount: 1
 
+# Образы из Harbor registry
+images:
+  authService:
+    repository: harbor.openidealab.com/codelab/auth-service
+    tag: latest
+  gateway:
+    repository: harbor.openidealab.com/codelab/gateway
+    tag: latest
+  agentRuntime:
+    repository: harbor.openidealab.com/codelab/agent-runtime
+    tag: latest
+  llmProxy:
+    repository: harbor.openidealab.com/codelab/llm-proxy
+    tag: latest
+
 # Настройки Ingress
 ingress:
   enabled: true
