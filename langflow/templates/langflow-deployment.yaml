@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "langflow.fullname" . }}
+spec:
+  replicas: {{ .Values.langflow.replicas }}
+  selector:
+    matchLabels:
+      app: langflow
+  template:
+    metadata:
+      labels:
+        app: langflow
+  spec:
+    containers:
+      - name: langflow
+        image: {{ .Values.langflow.image }}
+        ports:
+          - containerPort: {{ .Values.langflow.port }}
+        resources:
+          {{- toYaml .Values.langflow.resources | nindent 10 }}
+        envFrom:
+          - secretRef:
+            name: {{ include "langflow.fullname" . }}-secret
+            env:
+            {{- range $key, $value := .Values.langflow.env }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
+            {{- end }}

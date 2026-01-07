@@ -1,0 +1,46 @@
+langflow:
+  image: langflowai/langflow:latest
+  replicas: 1
+  port: 7860
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+
+  env:
+    LANGFLOW_HOST: 0.0.0.0
+    LANGFLOW_PORT: 7860
+    LANGFLOW_AUTO_LOGIN: "false"
+    LANGFLOW_SUPERUSER: admin
+
+
+externalPostgres:
+  enabled: true
+  host: 10.0.10.5
+  port: 5432
+  database: langflow
+  user: langflow
+  password: langflow_secret
+
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: langflow.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: langflow-tls
+  #    hosts:
+  #      - langflow.local
