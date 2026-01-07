@@ -65,7 +65,11 @@ Auth Service Database URL
 {{- else if eq .Values.services.authService.database.type "sqlite" }}
 {{- .Values.services.authService.database.sqliteUrl }}
 {{- else }}
-{{- printf "postgresql+asyncpg://%s:%s@%s:%d/%s" .Values.services.authService.database.user .Values.services.authService.database.password .Values.services.authService.database.host (int .Values.services.authService.database.port) .Values.services.authService.database.name }}
+{{- $host := .Values.services.authService.database.host }}
+{{- if .Values.services.authService.database.useInternal }}
+{{- $host = printf "%s-postgres" (include "codelab.fullname" .) }}
+{{- end }}
+{{- printf "postgresql+asyncpg://%s:%s@%s:%d/%s" .Values.services.authService.database.user .Values.services.authService.database.password $host (int .Values.services.authService.database.port) .Values.services.authService.database.name }}
 {{- end }}
 {{- end }}
 
@@ -78,6 +82,10 @@ Agent Runtime Database URL
 {{- else if eq .Values.services.agentRuntime.database.type "sqlite" }}
 {{- .Values.services.agentRuntime.database.sqliteUrl }}
 {{- else }}
-{{- printf "postgresql+asyncpg://%s:%s@%s:%d/%s" .Values.services.agentRuntime.database.user .Values.services.agentRuntime.database.password .Values.services.agentRuntime.database.host (int .Values.services.agentRuntime.database.port) .Values.services.agentRuntime.database.name }}
+{{- $host := .Values.services.agentRuntime.database.host }}
+{{- if .Values.services.agentRuntime.database.useInternal }}
+{{- $host = printf "%s-postgres" (include "codelab.fullname" .) }}
+{{- end }}
+{{- printf "postgresql+asyncpg://%s:%s@%s:%d/%s" .Values.services.agentRuntime.database.user .Values.services.agentRuntime.database.password $host (int .Values.services.agentRuntime.database.port) .Values.services.agentRuntime.database.name }}
 {{- end }}
 {{- end }}
