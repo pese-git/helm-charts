@@ -36,9 +36,15 @@ spec:
         env:
         - name: ENVIRONMENT
           value: {{ .Values.environment | quote }}
+        - name: PORT
+          value: {{ .Values.services.authService.port | quote }}
+        - name: AUTH_SERVICE__REDIS_URL
+          value: "redis://{{ include "codelab.fullname" . }}-redis:{{ .Values.services.redis.port }}/1"
         {{- range $key, $value := .Values.services.authService.env }}
+        {{- if and (ne $key "PORT") (ne $key "AUTH_SERVICE__REDIS_URL") }}
         - name: {{ $key }}
           value: {{ $value | quote }}
+        {{- end }}
         {{- end }}
         - name: AUTH_SERVICE__DB_URL
           valueFrom:

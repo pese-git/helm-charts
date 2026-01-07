@@ -94,9 +94,7 @@ services:
     port: 8003
     type: ClusterIP
     env:
-      PORT: "8003"
       AUTH_SERVICE__LOG_LEVEL: "DEBUG"
-      AUTH_SERVICE__REDIS_URL: "redis://redis:6379/1"
       AUTH_SERVICE__ENABLE_RATE_LIMITING: "false"
       AUTH_SERVICE__JWT_ISSUER: "https://auth.codelab.local"
       AUTH_SERVICE__JWT_AUDIENCE: "codelab-api"
@@ -147,14 +145,11 @@ services:
     port: 8000
     type: ClusterIP
     env:
-      PORT: "8000"
-      GATEWAY__AGENT_URL: "http://agent-runtime:8001"
       GATEWAY__LOG_LEVEL: "DEBUG"
       GATEWAY__WS_HEARTBEAT_INTERVAL: "30"
       GATEWAY__WS_CLOSE_TIMEOUT: "10"
       GATEWAY__MAX_CONCURRENT_REQUESTS: "100"
       GATEWAY__REQUEST_TIMEOUT: "30"
-      GATEWAY__AUTH_SERVICE_URL: "http://auth-service:8003"
       GATEWAY__USE_JWT_AUTH: "false"
     secrets:
       GATEWAY__INTERNAL_API_KEY: "change-me-in-production"
@@ -172,9 +167,6 @@ services:
     port: 8001
     type: ClusterIP
     env:
-      PORT: "8001"
-      AGENT_RUNTIME__GATEWAY_URL: "http://gateway:8000"
-      AGENT_RUNTIME__LLM_PROXY_URL: "http://llm-proxy:8002"
       AGENT_RUNTIME__LOG_LEVEL: "DEBUG"
       AGENT_RUNTIME__MAX_CONCURRENT_REQUESTS: "100"
       AGENT_RUNTIME__REQUEST_TIMEOUT: "30"
@@ -215,7 +207,6 @@ services:
     port: 8002
     type: ClusterIP
     env:
-      PORT: "8002"
       LLM_PROXY__DEFAULT_MODEL: "gpt-3.5-turbo"
       LLM_PROXY__LLM_MODE: "litellm"
       LLM_PROXY__LOG_LEVEL: "DEBUG"

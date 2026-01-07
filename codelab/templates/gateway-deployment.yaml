@@ -36,9 +36,17 @@ spec:
         env:
         - name: ENVIRONMENT
           value: {{ .Values.environment | quote }}
+        - name: PORT
+          value: {{ .Values.services.gateway.port | quote }}
+        - name: GATEWAY__AGENT_URL
+          value: "http://{{ include "codelab.fullname" . }}-agent-runtime:{{ .Values.services.agentRuntime.port }}"
+        - name: GATEWAY__AUTH_SERVICE_URL
+          value: "http://{{ include "codelab.fullname" . }}-auth-service:{{ .Values.services.authService.port }}"
         {{- range $key, $value := .Values.services.gateway.env }}
+        {{- if and (ne $key "PORT") (ne $key "GATEWAY__AGENT_URL") (ne $key "GATEWAY__AUTH_SERVICE_URL") }}
         - name: {{ $key }}
           value: {{ $value | quote }}
+        {{- end }}
         {{- end }}
         {{- range $key, $value := .Values.services.gateway.secrets }}
         - name: {{ $key }}

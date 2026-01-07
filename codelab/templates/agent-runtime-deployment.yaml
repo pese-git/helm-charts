@@ -36,9 +36,17 @@ spec:
         env:
         - name: ENVIRONMENT
           value: {{ .Values.environment | quote }}
+        - name: PORT
+          value: {{ .Values.services.agentRuntime.port | quote }}
+        - name: AGENT_RUNTIME__GATEWAY_URL
+          value: "http://{{ include "codelab.fullname" . }}-gateway:{{ .Values.services.gateway.port }}"
+        - name: AGENT_RUNTIME__LLM_PROXY_URL
+          value: "http://{{ include "codelab.fullname" . }}-llm-proxy:{{ .Values.services.llmProxy.port }}"
         {{- range $key, $value := .Values.services.agentRuntime.env }}
+        {{- if and (ne $key "PORT") (ne $key "AGENT_RUNTIME__GATEWAY_URL") (ne $key "AGENT_RUNTIME__LLM_PROXY_URL") }}
         - name: {{ $key }}
           value: {{ $value | quote }}
+        {{- end }}
         {{- end }}
         - name: AGENT_RUNTIME__DB_URL
           valueFrom:

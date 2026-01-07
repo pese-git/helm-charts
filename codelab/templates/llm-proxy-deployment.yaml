@@ -36,9 +36,13 @@ spec:
         env:
         - name: ENVIRONMENT
           value: {{ .Values.environment | quote }}
+        - name: PORT
+          value: {{ .Values.services.llmProxy.port | quote }}
         {{- range $key, $value := .Values.services.llmProxy.env }}
+        {{- if ne $key "PORT" }}
         - name: {{ $key }}
           value: {{ $value | quote }}
+        {{- end }}
         {{- end }}
         {{- range $key, $value := .Values.services.llmProxy.secrets }}
         - name: {{ $key }}
