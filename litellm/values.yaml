@@ -1,0 +1,54 @@
+replicaCount: 1
+
+image:
+  repository: docker.litellm.ai/berriai/litellm
+  tag: main-stable
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 4000
+
+# Environment variables for LiteLLM proxy
+# Add any additional non-sensitive environment variables here
+env:
+  STORE_MODEL_IN_DB: "True"
+  # LITELLM_LOG: "INFO"  # Optional: Log level (DEBUG, INFO, WARNING, ERROR)
+
+# Secret environment variables (stored in Kubernetes Secret)
+# Database connection settings
+secretEnv:
+  db_user: "llmproxy"
+  db_password: "dbpassword9090"
+  db_host: "host"
+  db_name: "litellm"
+  db_port: "5432"
+  # LiteLLM authentication (uncomment and set values for production)
+  # litellm_master_key: ""  # Master key for API authentication
+  # litellm_ui_username: "admin"  # UI login username
+  # litellm_ui_password: "admin"  # UI login password
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: litellm.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
