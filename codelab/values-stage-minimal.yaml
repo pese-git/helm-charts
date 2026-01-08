@@ -38,7 +38,36 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/websocket-services: "gateway"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  paths:
+    # OAuth endpoints для auth-service
+    oauth:
+      path: /oauth
+      pathType: Prefix
+      service: auth-service
+      port: 8003
+    # Well-known endpoints для auth-service
+    wellknown:
+      path: /.well-known
+      pathType: Prefix
+      service: auth-service
+      port: 8003
+    # API endpoints для gateway
+    api:
+      path: /api/v1
+      pathType: Prefix
+      service: gateway
+      port: 8000
+    # Gateway доступен по корневому пути /
+    gateway:
+      path: /
+      pathType: Prefix
+      service: gateway
+      port: 8000
 
 # Используем внутренний PostgreSQL для staging
 services:
