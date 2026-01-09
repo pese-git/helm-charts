@@ -16,6 +16,9 @@ images:
   llmProxy:
     repository: harbor.openidealab.com/codelab/llm-proxy
     tag: latest
+  website:
+    repository: harbor.openidealab.com/codelab/website
+    tag: latest
 
 # Настройки Ingress
 ingress:
@@ -87,6 +90,14 @@ resources:
     limits:
       cpu: 500m
       memory: 256Mi
+  
+  website:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
   
   redis:
     requests:

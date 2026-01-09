@@ -41,6 +41,12 @@ images:
     tag: latest
     pullPolicy: IfNotPresent
   
+  ## Настройки образа website
+  website:
+    repository: harbor.openidealab.com/codelab/website
+    tag: latest
+    pullPolicy: IfNotPresent
+  
   ## Настройки образа redis
   redis:
     repository: redis
@@ -96,12 +102,12 @@ ingress:
       pathType: Prefix
       service: gateway
       port: 8000
-    # Gateway доступен по корневому пути /
-    gateway:
+    # Website (SPA) доступен по корневому пути /
+    website:
       path: /
       pathType: Prefix
-      service: gateway
-      port: 8000
+      service: website
+      port: 80
 
 # =============================================================================
 # Настройки сервисов
@@ -243,6 +249,19 @@ services:
       timeoutSeconds: 10
       failureThreshold: 3
   
+  ## Настройки website
+  website:
+    enabled: true
+    port: 80
+    type: ClusterIP
+    healthcheck:
+      enabled: true
+      path: /
+      initialDelaySeconds: 5
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
+  
   ## Настройки redis
   redis:
     enabled: true
@@ -318,6 +337,14 @@ resources:
     limits:
       cpu: 1000m
       memory: 512Mi
+  
+  website:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
   
   redis:
     requests:
