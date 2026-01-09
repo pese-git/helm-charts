@@ -22,13 +22,6 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.securityContext.enabled }}
-      securityContext:
-        runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
-        runAsUser: {{ .Values.securityContext.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.runAsGroup }}
-        fsGroup: {{ .Values.securityContext.fsGroup }}
-      {{- end }}
       containers:
       - name: website
         image: "{{ .Values.images.website.repository }}:{{ .Values.images.website.tag }}"
